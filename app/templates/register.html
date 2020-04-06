@@ -1,0 +1,23 @@
+<!DOCTYPE  html>
+<html  lang="en">
+    <head>
+        <h1>Epytodo</h1>
+        <h2>Register Form</h2>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+    </head>
+    <body>
+        <form method="POST" action="/register/form">
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="text" name="username" id="username" placeholder="Username">
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="password" name="password" id="password" placeholder="Password">
+                </div>
+            </div>
+            <button>REGISTER</button>
+        </form>
+    </body>
+</html>

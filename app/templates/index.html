@@ -1,0 +1,51 @@
+<!DOCTYPE  html>
+<html  lang="en">
+    <head>
+        <title>Epytodo app</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    </head>
+    <body>
+        {% set sign = '/signout' %}
+        {% if user_id == -1 %}
+            {% set sign = '/signin' %}
+        {% endif %}
+        <header>
+        <div class="container">
+            <h1 class="logo">Epytodo</h1>
+            <strong><nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('route_index') }}">Home</a></li>
+                    <li><a href="{{ url_for('route_all_users') }}">All users</a></li>
+                    <li><a href="{{ url_for('route_' + sign[1:]) }}"> {{ sign[1:].capitalize() }}</a></li>
+                    <li><a href="{{ url_for('route_user') }}"> User info</a></li>
+                    <li><a href="{{ url_for('route_all_user_tasks') }}"> My tasks</a></li>
+                </ul>
+            </nav></strong>
+        </div>
+        </header>
+        <!--
+        {% set  navlist = [(sign, 'sign', sign[1:].capitalize()), ('/user', 'user', 'User'), ('/user/task', 'mytask', 'My tasks')] %}
+        <nav>
+            <ul>
+                {% for href , id , caption  in  navlist  %}
+                <li>
+                    <a id="{{ id|e }}" href="{{ href|e }}">{{  caption|e }}</a>
+                </li>
+                {%  endfor  %}
+            </ul>
+        </nav>
+        --->
+        <p class = "user_id_show">
+            USER ID = {{ result }}
+        </p>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE  html>
+<html  lang="en">
+    <head>
+    </head>
+    <body>
+        {% set  navlist = [ ('/register/form', 'register', 'Register Form'),
+                            ('/signin/form', 'signin', 'Sign in Form'),
+                            ('/user/task/add/form', 'task_add', 'Task Create Form'),
+                            ('/user/task/change', 'change task', 'Change Task Form') ]  -%}
+        <nav>
+            <ul>
+                {% for href , id , caption  in  navlist  %}
+                    <li>
+                        <a id="{{ id|e }}" href="{{ href|e }}">{{  caption|e }}</a>
+                    </li>
+                {%  endfor  %}
+            </ul>
+        </nav>
+    </body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE  html>
+<html  lang="en">
+    <head>
+
+    </head>
+    <body>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="/user/task/del">
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="title" name="title" placeholder="Task Name">
+                </div>
+            </div>
+            <button>DELETE TASK</button>
+        </form>
+    </body>
+</html>

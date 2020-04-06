@@ -1,0 +1,38 @@
+body {
+    background-color: aquamarine;
+}
+header {
+    background-color: cornflowerblue;
+    height: 35px;
+    width: 100%;
+    opacity: .9;
+    text-align: center;
+    margin-bottom: 10px;
+}
+header h1.logo {
+    margin: 0;
+    font-size: 5;
+    text-transform: uppercase;
+    color: darkblue;
+}
+  
+.menu {
+    background-color: cornflowerblue;
+    margin-top: 8px;
+}
+.menu li {
+    display: inline;
+}
+.menu li + li {
+    margin-left: 35px;
+}
+.menu li a {
+    color: #444;
+    text-decoration: none;
+}
+
+.user_id_show {
+    position: relative;
+    top : 100px;
+    text-align: center;
+}
