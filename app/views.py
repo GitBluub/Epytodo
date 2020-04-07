@@ -1,141 +1,163 @@
-from app import app
-from flask import render_template, request, redirect, url_for
-from flask import jsonify, flash
-import pymysql as sql
-from config import *
-from .models import *
-from app import login_only, not_login_only
 from datetime import datetime
-from .api import *
-import requests
-from .controller import modify_task
 
-#######FORMS
+import pymysql as sql
+import requests
+from flask import (flash, jsonify, make_response, redirect, render_template,
+                   request, session, url_for)
+
+from app import app
+
+from .api import (api_add_task, api_delete_task, api_user_connect,
+                  api_user_create, api_user_disconnect)
+from .controller import (create_new_task, create_new_user,
+                         delete_selected_task, get_task_info,
+                         get_task_list_of_uid, get_user_info, modify_task,
+                         sign_in_user)
+from .models import (find_uid_with_username, get_task_list,
+                     get_task_list_no_uid, task_create, update_task)
+from .post_request import (get_uid, make_post_change, make_post_create,
+                           make_post_register, make_post_signin)
+
+
+# FORMS
 @app.route('/forms', methods=['GET'])
 def route_forms():
     return (render_template("forms.html"))
 
-#######HOME
+
+# HOME
 @app.route('/', methods=['GET'])
 def route_index():
-    return (render_template("index.html", result=app.id, user_id=app.id))
+    uid = get_uid()
+    return render_template("index.html", result=uid, user_id=uid)
 
-#######REGISTER POST
+
+# REGISTER POST
 @app.route('/register', methods=['POST'])
 def route_register():
     data = request.json
-    print(data)
     username = data.get("username")
     password = data.get("password")
     result = -1
-    if username == None or password == None:
-        result = -1
-    elif len(username) and len(password):
+    if username and password:
         result = create_new_user(username, password)
     return (jsonify(api_user_create(username, password, result)))
 
-#######REGISTER FORM
-@app.route('/register/form', methods=['GET', 'POST'])
-def route_register_form():
-    if request.method == 'GET':
-        return (render_template("register.html"))
-    if request.method == 'POST':
-        username = request.form["username"]
-        password = request.form["password"]
-        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-        data_load = {"username":username,
-                    "password":password}
-        r = requests.post(f'http://127.0.0.1:5000/register',
-                            json = data_load,
-                            headers = headers)
-        return (r.json())
 
-#######SIGNIN
+@app.route('/register/form', methods=['GET'])
+def route_register_form_render_template():
+    return (render_template("register.html"))
+
+
+# REGISTER FORM
+@app.route('/register/form', methods=['POST'])
+def route_register_form():
+    username = request.form["username"]
+    password = request.form["password"]
+    return make_post_register(username, password)
+
+
+# SIGNIN
 @app.route('/signin', methods=['POST'])
 def route_signin():
+    if not request.data:
+        return {"error": "internal error"}
     data = request.get_json()
+    if data is None:
+        return {"error": "internal error"}
     username = data.get("username")
     password = data.get("password")
     result = -1
-    if (app.id != -1):
-        return (jsonify(api_user_connect(username, password, result, -2)))
-    if len(username) and len(password):
+    if request.cookies.get("user_id") is not None:
+        return (jsonify(api_user_connect(username, password, result)))
+    if username and password:
         result = sign_in_user(username, password)
-    return (jsonify(api_user_connect(username, password, result, app.id)))
+    resp = make_response(
+        jsonify(api_user_connect(username, password, result)))
+    if result != -1:
+        session["user_id"] = result
+    return resp
 
-#######SIGNIN FORM
-@app.route('/signin/form', methods=['GET', 'POST'])
+
+@app.route('/signin/form', methods=['GET'])
 def route_signin_form():
-    if request.method == 'GET':
-        return (render_template("signin.html"))
-    if request.method == 'POST':
-        username = request.form["username"]
-        password = request.form["password"]
-        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-        data_load = {"username":username,
-                    "password":password}
-        r = requests.post(f'http://127.0.0.1:5000/signin',
-                            json = data_load,
-                            headers = headers)
-        return (r.json())
+    return (render_template("signin.html"))
 
-#######SIGNOUT POST
+# SIGNIN FORM
+@app.route('/signin/form', methods=['POST'])
+def route_signin_form_post():
+    username = request.form["username"]
+    password = request.form["password"]
+    uid = session.get("user_id")
+    result = make_post_signin(username, password, uid)
+    if result.get("result") == "signin successful":
+        session["user_id"] = find_uid_with_username(username)
+    return result
+
+
+# SIGNOUT POST
 @app.route('/signout', methods=['GET'])
-def route_signout():
-    t = jsonify(api_user_disconnect())
-    app.id = -1
-    return t
+def route_signout_form():
+    return render_template("signout.html")
 
-#######USER GET
+
+@app.route('/signout', methods=['POST'])
+def route_signout_post():
+    result = jsonify(api_user_disconnect())
+    session.pop("user_id", None)
+    return result
+
+# USER GET
 @app.route('/user', methods=['GET'])
 def route_user():
-    return (jsonify(get_user_info(app.id)))
+    return jsonify(get_user_info(get_uid()))
 
-#######USER GET TASK LSIT
+
+# USER GET TASK LSIT
 @app.route('/user/task', methods=['GET'])
 def route_all_user_tasks():
-    return (jsonify(get_task_list(app.id)))
+    return jsonify(get_task_list_of_uid(get_uid()))
 
-#######GET TASK INFO ID
+
+# GET TASK INFO ID
 @app.route('/user/task/<nb>', methods=['GET'])
 def route_view_specific_task_get(nb):
-    if request.method == "GET":
-        return (jsonify(get_task_info(app.id, nb)))
+    return jsonify(get_task_info(get_uid(), nb))
 
-#######POST CHANGE TASK INFO ID
+
+# POST CHANGE TASK INFO ID
 @app.route('/user/task/<nb>', methods=['POST'])
 def route_view_specific_task(nb):
     data = request.get_json()
-    if app.id == -1:
-        return ({"error":"you must be logged in"})
-    internal_error = {"error" : "internal error"}
-    if data == None:
-        return (internal_error)
+    if get_uid() == -1:
+        return ({"error": "you must be logged in"})
+    if data is None:
+        return {"error": "internal error"}
     result = modify_task(nb, data)
-    return (jsonify(result))
+    return jsonify(result)
 
-#######POST CHANGE TASK INFO FORM
-@app.route('/user/task/change', methods=['GET', 'POST'])
+
+# POST CHANGE TASK INFO FORM
+@app.route('/user/task/change', methods=['GET'])
+def route_view_specific_task_form_render():
+    return (render_template("task.html"))
+
+
+@app.route('/user/task/change', methods=['POST'])
 def route_view_specific_task_form():
-    if request.method == "GET":
-        return (render_template("task.html"))
-    if request.method == "POST":
-        nb = request.form["task_id"]
-        name = request.form["title"]
-        begin = request.form["begin"]
-        end = request.form["end"]
-        status = request.form["status"]
-        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-        data_load = {"title":name,
-                    "begin":begin,
-                    "end":end,
-                    "status":status}
-        r = requests.post(f'http://127.0.0.1:5000/user/task/{nb}',
-                            json = data_load,
-                            headers = headers)
-        return (r.json())
+    nb = request.form["task_id"]
+    name = request.form["title"]
+    begin = request.form["begin"]
+    end = request.form["end"]
+    status = request.form["status"]
+    data_load = {"title": name,
+                 "begin": begin,
+                 "end": end,
+                 "status": status}
+    return make_post_change(data_load, nb)
 
-#######POST ADD TASK
+
+# POST ADD TASK
 @app.route('/user/task/add', methods=['POST'])
 def route_add_task():
     data = request.json
@@ -144,56 +166,35 @@ def route_add_task():
     end = data.get("end")
     status = data.get("status")
     if not name:
-        return jsonify(api_add_task(app.id, name, 0))
+        return jsonify(api_add_task(get_uid(), name, 0))
     result = create_new_task(name, begin, end, status)
-    return jsonify(api_add_task(app.id, name, result))
+    return jsonify(api_add_task(get_uid(), name, result))
 
-#######ADD TASK FORM
-@app.route('/user/task/add/form', methods=['GET', 'POST'])
+
+# ADD TASK FORM
+@app.route('/user/task/add/form', methods=['GET'])
+def route_create_new_task_get_render():
+    return (render_template("add_task.html"))
+
+
+@app.route('/user/task/add/form', methods=['POST'])
 def route_create_new_task_get():
-    if request.method == 'GET':
-        return (render_template("add_task.html"))
-    if request.method == 'POST':
-        if app.id == -1:
-            return jsonify(api_add_task(app.id, "", 0))
-        name = request.form["title"]
-        begin = request.form["begin"]
-        end = request.form["end"]
-        status = request.form["status"]
-        if not begin:
-            begin = datetime.now()
-        if not end:
-            end = datetime.now()
-        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-        data_load = {"title":name,
-                    "begin":begin,
-                    "end":end,
-                    "status":status}
-        r = requests.post(f'http://127.0.0.1:5000/user/task/add',
-                            json = data_load,
-                            headers = headers)
-        return (r.json())
+    if get_uid() == -1:
+        return jsonify(api_add_task(get_uid(), "", 0))
+    name = request.form["title"]
+    begin = request.form["begin"]
+    end = request.form["end"]
+    status = request.form["status"]
+    if not begin:
+        begin = datetime.now()
+    if not end:
+        end = datetime.now()
+    return make_post_create(name, begin, end, status)
 
-#######DELETE TASK (ID)
+
+# DELETE TASK (ID)
 @app.route('/user/task/del/<nb>', methods=['GET', 'POST'])
 def route_delete_task(nb):
-    if app.id == -1:
-        return jsonify(api_delete_task(nb, app.id, 0))
-    return jsonify(api_delete_task(nb, app.id, delete_task(int(nb))))
-
-#######SEE ALL USERS
-@app.route('/allusers', methods=['GET'])
-def route_all_users():
-    result = ""
-    try:
-        connect = sql.connect(host=DATABASE_HOST, unix_socket=DATABASE_SOCK,
-                              user=DATABASE_USER, passwd=DATABASE_PASS,
-                              db=DATABASE_NAME)
-        cursor = connect.cursor()
-        cursor.execute("SELECT * from user")
-        result = cursor.fetchall()
-        cursor.close()
-        connect.close()
-    except Exception as e:
-        print(f"Caught an exception : {e}")
-    return jsonify(result)
+    if get_uid() == -1:
+        return {"error": "you must be logged in"}
+    return jsonify(api_delete_task(delete_selected_task(nb)))

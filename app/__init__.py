@@ -1,39 +1,28 @@
-from flask import Flask
-from flask_login import LoginManager
 from functools import wraps
-from flask import current_app, abort
 
-login_manager = LoginManager()
+import pymysql as sql
+import requests
+from flask import Flask, abort, current_app
+
+import config as cf
+
 app = Flask(__name__)
 app.config.from_object('config')
 app.secret_key = "dqzldqz$dlqz"
-login_manager.init_app(app)
-login_manager.login_view = 'route_signin'
-app.id = -1
+app.connect = sql.connect(host=cf.DATABASE_HOST,
+                          unix_socket=cf.DATABASE_SOCK,
+                          user=cf.DATABASE_USER, passwd=cf.DATABASE_PASS,
+                          db=cf.DATABASE_NAME)
+app.cursor = app.connect.cursor()
 
 
-@login_manager.user_loader
-def user_loader(user_id):
-    if app.id != -1:
-        return app.id
-    return None
-
-
-def login_only(f):
-    @wraps(f)
-    def wrapped(**kwargs):
-        if app.id == -1:
-            abort(404)
-
-        return f(**kwargs)
-    return wrapped
-
-
-def not_login_only(f):
-    @wraps(f)
-    def wrapped(**kwargs):
-        if app.id != -1:
-            abort(404)
-
-        return f(**kwargs)
-    return wrapped
+def app_factory():
+    app = Flask(__name__)
+    app.config.from_object('config')
+    app.secret_key = "dqzldqz$dlqz"
+    app.connect = sql.connect(host=cf.DATABASE_HOST,
+                              unix_socket=cf.DATABASE_SOCK,
+                              user=cf.DATABASE_USER, passwd=cf.DATABASE_PASS,
+                              db=cf.DATABASE_NAME)
+    app.cursor = app.connect.cursor()
+    return app

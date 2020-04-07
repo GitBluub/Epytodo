@@ -3,4 +3,4 @@ curl --header "Content-Type: application/json" --request POST --data '{"title":"
 ## signin
 curl --header "Content-Type: application/json" --request POST --data '{"username":"bluub","password":"bluub"}' http://127.0.0.1:5000/signin
 ## user has tasks
-curl --header "Content-Type: application/json" --request GET http://127.0.0.1:5000/user/task 
+curl --header "Content-Type: application/json" --request GET http://127.0.0.1:5000/user/task -c jar
