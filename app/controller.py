@@ -1,15 +1,11 @@
 import pymysql as sql
 
-from app import app
+from .models import (create_user, delete_task, get_password_list,
+                     get_task_id_list, get_task_list, get_task_list_no_uid,
+                     get_task_name_list, get_user_has_task_table,
+                     get_user_id_list, get_username_list, task_create,
+                     update_task)
 
-from .post_request import get_uid
-from .models import (create_user, get_password_list, get_task_id_list,
-                     get_task_list, get_task_list_no_uid, get_task_name_list,
-                     get_user_has_task_table, get_user_id_list,
-                     get_username_list, task_create, update_task)
-
-
-# TODO: Utiliser des valeurs de retours un peu plus sympa que -1/0/1
 
 def create_new_user(username, password):
     if username is None or password is None:
@@ -68,7 +64,7 @@ def get_task_info(user_id, task_id):
 def get_task_list_of_uid(user_id):
     if (user_id == -1):
         return {"error": "you must be logged in"}
-    usr_has_task = get_user_has_task_table()
+    user_has_task = get_user_has_task_table()
     task_list_user = [int(i[1]) for i in user_has_task if int(i[0]) == user_id]
     task_list = get_task_list()
     task = []
@@ -102,9 +98,9 @@ def modify_task(task_id, data):
     return ({"result": "update done"})
 
 
-def create_new_task(name, begin, end, status):
+def create_new_task(name, begin, end, status, uid):
     list_user_id = get_user_id_list()
-    if get_uid() not in list_user_id:
+    if uid not in list_user_id:
         return 0
     list_task_name = get_task_name_list()
     if name in list_task_name:
@@ -113,7 +109,7 @@ def create_new_task(name, begin, end, status):
     task_id = max(list_task_id) + 1 if list_task_id else 1
     if status not in ('not started', 'in progress', 'done'):
         status = 'not started'
-    task_create(task_id, name, begin, end, status)
+    task_create(task_id, name, begin, end, status, uid)
     return 1
 
 
@@ -128,8 +124,8 @@ def delete_selected_task(task_id):
 def get_all_users():
     result = ""
     try:
-        app.cursor.execute("SELECT * from user")
-        result = app.cursor.fetchall()
+        g.cursor.execute("SELECT * from user")
+        result = g.cursor.fetchall()
     except Exception as e:
         print(f"Caught an exception : {e}")
     return (result)
