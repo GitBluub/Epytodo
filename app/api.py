@@ -7,6 +7,18 @@ from flask import (flash, jsonify, redirect, render_template, request, session,
 from app import app
 
 
+# NOTE: Instead of returning a jsonified single-entry dict
+#       the format described below would bring a bit of consistency
+#       in your HTTP return statemetns:
+
+"""
+.. code:javascript
+    {
+        "error": true, // false
+        "message": "account created", // "missing name,password"
+    }
+"""
+
 def api_user_create(username, password, return_code):
     result = {}
     if return_code == -1 or not username.isalnum():

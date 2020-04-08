@@ -9,6 +9,8 @@ from .models import (create_user, get_password_list, get_task_id_list,
                      get_username_list, task_create, update_task)
 
 
+# TODO: Utiliser des valeurs de retours un peu plus sympa que -1/0/1
+
 def create_new_user(username, password):
     if username is None or password is None:
         return -1

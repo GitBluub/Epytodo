@@ -40,7 +40,13 @@ def route_register():
     password = data.get("password")
     result = -1
     if username and password:
+        # NOTE: See api.py
         result = create_new_user(username, password)
+    # TODO: Returning the following format:
+    #       jsonify(...), integer
+    #       allows to leverage HTTP codes.
+    # NOTE: Example:
+    #       {"error": True, "message": "user %username already exists"}, 422
     return (jsonify(api_user_create(username, password, result)))
 
 
@@ -52,6 +58,9 @@ def route_register_form_render_template():
 # REGISTER FORM
 @app.route('/register/form', methods=['POST'])
 def route_register_form():
+    # TODO: It might be a bit less risky to use `request.form.get`
+    #       and check if either username and password are None
+    #       -> Current code could induce KeyError
     username = request.form["username"]
     password = request.form["password"]
     return make_post_register(username, password)
@@ -61,6 +70,8 @@ def route_register_form():
 @app.route('/signin', methods=['POST'])
 def route_signin():
     if not request.data:
+        # TODO: This return could return a more meaningful error message
+        #       such as "Missing post data" with a "Invalid request" HTTP code.
         return {"error": "internal error"}
     data = request.get_json()
     if data is None:
@@ -145,6 +156,8 @@ def route_view_specific_task_form_render():
 
 @app.route('/user/task/change', methods=['POST'])
 def route_view_specific_task_form():
+    # TODO: Use get instead of __getattr__
+    # TODO: Use PUT instead of POST (POST = creation, PUT = edition)
     nb = request.form["task_id"]
     name = request.form["title"]
     begin = request.form["begin"]
