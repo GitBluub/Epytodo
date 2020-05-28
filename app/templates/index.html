@@ -3,6 +3,8 @@
     <head>
         <title>Epytodo app</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/my_tasks.css') }}">    
     </head>
     <body>
         {% set sign = '/signout' %}
@@ -10,33 +12,42 @@
             {% set sign = '/signin' %}
         {% endif %}
         <header>
-        <div class="container">
-            <h1 class="logo">Epytodo</h1>
+        <div id="navmenu" class="container">
+            <h1 class="logo"> <a href={{ url_for("epytodo.route_index") }} style="text-decoration: none">Epytodo</a></h1>
             <strong><nav>
                 <ul class="menu">
-                    <li><a href="{{ url_for('.' + 'route_index') }}">Home</a></li>
                     <li><a href="{{ url_for('.' + 'route_' + sign[1:] + '_form') }}"> {{ sign[1:].capitalize() }}</a></li>
                     <li><a href="{{ url_for('.' + 'route_user') }}"> User info</a></li>
-                    <li><a href="{{ url_for('.' + 'route_all_user_tasks') }}"> My tasks</a></li>
+                    <li><a href="{{ url_for('.' + 'route_my_tasks') }}"> My tasks</a></li>
+                    <li><a href="{{ url_for('.' + 'route_create_new_task_get_render') }}"> Add task</a></li>
+                    <li><a href="{{ url_for('.' + 'route_view_specific_task_form_render') }}"> Change task</a></li>
                 </ul>
             </nav></strong>
         </div>
         </header>
-        <!--
-        {% set  navlist = [(sign, 'sign', sign[1:].capitalize()), ('/user', 'user', 'User'), ('/user/task', 'mytask', 'My tasks')] %}
-        <nav>
+        {% if user_id == -1 %}
+            <p id="disconnected">You must be connected to see your tasks</p>
+        {% endif %}
+        
+        {% if user_id != -1 %}
+        <nav id="tasks">
             <ul>
-                {% for href , id , caption  in  navlist  %}
-                <li>
-                    <a id="{{ id|e }}" href="{{ href|e }}">{{  caption|e }}</a>
-                </li>
+                {% set progress_array = ["done", "in progress", "not started"] %}
+                {% set color_status = ["green", "orange", "red"] %}
+                {% for dict  in  task_list  %}
+                {% set task_id = dict["task_id"] %}
+                {% set name = dict["title"] %}
+                {% set begin = dict["begin"] %}
+                {% set end = dict["end"] %}
+                {% set status = dict["status"] %}
+                {% set status_color = color_status[progress_array.index(status)] %}
+                    <li>
+                        <a href={{ "/user/task/info/" + task_id }} id={{ status_color }}>"{{ name }}" started at {{ begin }} and will end at {{ end }}. Current Status is {{ status }}</a>
+                    </li>
                 {%  endfor  %}
             </ul>
         </nav>
-        --->
-        <p class = "user_id_show">
-            USER ID = {{ result }}
-        </p>
+        {% endif %}
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <ul class=flashes>

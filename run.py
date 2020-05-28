@@ -37,7 +37,7 @@ def main():
     epytodo.before_request(get_db)
     epytodo.teardown_appcontext(teardown_db)
     epytodo.register_blueprint(blueprint, url_prefix="/")
-    epytodo.run(debug=True)
+    epytodo.run()
 
 
 if __name__ == "__main__":

@@ -5,22 +5,23 @@ from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
 
 
-def api_user_create(username, password, return_code):
-    if return_code == -1 or not username.isalnum():
+def api_user_create(return_code):
+    if return_code == -1:
         return {"error": "internal error"}
-    elif (return_code == 0):
+    if return_code == "account already exists":
         return {"error": "account already exists"}
     else:
         return {"result": "account created"}
 
 
-def api_user_connect(username, password, return_code):
+def api_user_connect(return_code):
     if return_code == -1:
         return {"error": "internal error"}
-    elif (return_code == 0):
+    if return_code == 0:
         return {"error": "login or password does not match"}
-    elif (return_code >= 1):
+    if return_code >= 1:
         return {"result": "signin successful"}
+    return {"error": "internal error"}
 
 
 def api_user_disconnect():
@@ -30,13 +31,13 @@ def api_user_disconnect():
         return {"result": "signout successful"}
 
 
-def api_add_task(user_id, name, return_code):
-    if (user_id == -1):
+def api_add_task(user_id, return_code):
+    if user_id == -1:
         return {"error": "you must be logged in"}
-    if not name:
-        return {"error": "internal error"}
     if return_code == 0:
-        return {"error": "internal error"}
+        return {"error": "invalid connection, please reconnect"}
+    if return_code == -1:
+        return {"error": "task with same name already exists"}
     return {"result": "new task added"}
 
 

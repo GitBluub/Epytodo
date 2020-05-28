@@ -89,9 +89,9 @@ def delete_task(task_id):
     g.sql_db.commit()
 
 
-def update_task(task_id, title, begin, end, status):
+def update_task(task_id, title, begin, end, status, uid):
     delete_task(task_id)
-    task_create(task_id, title, begin, end, status)
+    task_create(task_id, title, begin, end, status, uid)
     g.sql_db.commit()
 
 

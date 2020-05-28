@@ -38,7 +38,7 @@ def make_post_signin(username, password, uid):
     return resp.json()
 
 
-def make_post_change(data_load, uid):
+def make_post_change(data_load, nb, uid):
     cookie_jar = {}
     if uid is not None:
         cookie_jar = {"user_id": str(uid)}
@@ -64,5 +64,15 @@ def make_post_create(name, begin, end, status, uid):
     resp = requests.post(HOST_URL + 'user/task/add',
                          json=data_load,
                          headers=headers,
+                         cookies=cookie_jar)
+    return resp.json()
+
+
+def make_post_delete(nb):
+    cookie_jar = {}
+    uid = get_uid()
+    if uid is not None:
+        cookie_jar = {"user_id": str(uid)}
+    resp = requests.post(HOST_URL + 'user/task/del/' + str(nb),
                          cookies=cookie_jar)
     return resp.json()

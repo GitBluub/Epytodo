@@ -2,11 +2,10 @@ body {
     background-color: aquamarine;
 }
 header {
-    background-color: cornflowerblue;
     height: 35px;
     width: 100%;
     opacity: .9;
-    text-align: center;
+    text-align: left;
     margin-bottom: 10px;
 }
 header h1.logo {
@@ -15,24 +14,30 @@ header h1.logo {
     text-transform: uppercase;
     color: darkblue;
 }
-  
-.menu {
-    background-color: cornflowerblue;
-    margin-top: 8px;
-}
-.menu li {
+
+#navmenu li {
     display: inline;
 }
-.menu li + li {
+#navmenu li + li {
     margin-left: 35px;
 }
-.menu li a {
+#navmenu li a {
     color: #444;
     text-decoration: none;
 }
 
 .user_id_show {
-    position: relative;
+    position: static;
     top : 100px;
     text-align: center;
+}
+
+#disconnected {
+    position: static;
+    padding-top: 60px;
+}
+
+#tasks {
+    position: static;
+    padding-top : 60px;
 }

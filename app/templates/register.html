@@ -1,9 +1,10 @@
 <!DOCTYPE  html>
 <html  lang="en">
     <head>
-        <h1>Epytodo</h1>
-        <h2>Register Form</h2>
+        <h1 class="logo"> <a href={{ url_for("epytodo.route_index") }} style="text-decoration: none">Epytodo</a></h1>
+        <h2>Register</h2>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
     </head>
     <body>
         <form method="POST" action="/register/form">
@@ -19,5 +20,6 @@
             </div>
             <button>REGISTER</button>
         </form>
+        <p id="signin">Already have an account ? <a href={{ url_for("epytodo.route_signin_form") }}>SIGN IN</a>
     </body>
 </html>

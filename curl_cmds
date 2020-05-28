@@ -1,6 +1,0 @@
-## task id change
-curl --header "Content-Type: application/json" --request POST --data '{"title":"blaa","begin":"MONDAY","end":"kwa","status":"inprogress"}' http://127.0.0.1:5000/user/task/1
-## signin
-curl --header "Content-Type: application/json" --request POST --data '{"username":"bluub","password":"bluub"}' http://127.0.0.1:5000/signin
-## user has tasks
-curl --header "Content-Type: application/json" --request GET http://127.0.0.1:5000/user/task -c jar

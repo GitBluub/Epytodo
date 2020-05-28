@@ -1,0 +1,21 @@
+<!DOCTYPE  html>
+<html  lang="en">
+    <head>
+        <h1 class="logo"> <a href={{ url_for("epytodo.route_index") }} style="text-decoration: none">Epytodo</a></h1>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+    </head>
+    <body>
+        <div id="info">
+            {% set name = task_info["title"] %}
+            {% set begin = task_info["begin"] %}
+            {% set end = task_info["end"] %}
+            {% set status = task_info["status"] %}
+            <p> NAME : {{ name }} </p>
+            <p> STATUS : {{ status }} </p>
+            <p> BEGIN : {{ begin }} </p>
+            <p> END : {{ end }} </p>
+            <p><a href="{{ '/user/task/delete/' + task_id  }}"> Delete it </a></p>
+        </div>
+    </body>
+</html>

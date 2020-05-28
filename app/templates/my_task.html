@@ -1,0 +1,28 @@
+<!DOCTYPE  html>
+<html  lang="en">
+    <head>
+        <h1 class="logo"> <a href={{ url_for("epytodo.route_index") }} style="text-decoration: none">Epytodo</a></h1>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/my_tasks.css') }}">
+    </head>
+    <body>
+        <nav id="tasks">
+            <ul>
+                {% set progress_array = ["done", "in progress", "not started"] %}
+                {% set color_status = ["green", "orange", "red"] %}
+                {% for dict  in  task_list  %}
+                {% set task_id = dict["task_id"] %}
+                {% set name = dict["title"] %}
+                {% set begin = dict["begin"] %}
+                {% set end = dict["end"] %}
+                {% set status = dict["status"] %}
+                {% set status_color = color_status[progress_array.index(status)] %}
+                    <li>
+                        <a href={{ "/user/task/info/" + task_id }} id={{ status_color }}>"{{ name }}" started at {{ begin }} and will end at {{ end }}. Current Status is {{ status }}</a>
+                    </li>
+                {%  endfor  %}
+            </ul>
+        </nav>
+    </body>
+</html>
